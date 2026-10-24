@@ -1,0 +1,15 @@
+{
+  "tool": "OpenAI built-in image generation",
+  "assets": [
+    {
+      "id": "app_icon",
+      "prompt": "Use case: logo-brand. Create a premium chess app launcher icon for Checkmate Crew. Square canvas with an opaque solid deep forest green #17352C background filling every pixel edge to edge, no rounded outer corners. Center a bold ivory Staunton knight head silhouette and small crown motif integrated as one memorable emblem, restrained warm gold accents, clean polished flat 2D vector-like style, crisp thick contours and no small details. Emblem fully contained inside central 60% safe zone for circular and rounded-square icon masks. No words, letters, watermark, board, shadow or surrounding mockup. Match ivory chess sprite style in reference; reference is style inspiration only. Exactly one icon.",
+      "file": "assets/branding/app_icon.png"
+    },
+    {
+      "id": "splash_logo",
+      "prompt": "Use case: logo-brand. Create a transparent-background chess splash screen emblem for Checkmate Crew, matching the reference classic ivory Staunton piece style. Exactly one centered ivory knight head with a simple warm gold crown above, clean flat 2D vector-like silhouette with restrained internal shading, bold charcoal outlines, polished and legible on deep forest green. Square canvas, entire motif within central 65%, generous transparent padding. True transparent alpha outside motif. No background, ground, board, shadow, typography, words, lettering or watermark. This emblem will be centered on a native splash screen.",
+      "file": "assets/branding/splash_logo.png"
+    }
+  ]
+}
