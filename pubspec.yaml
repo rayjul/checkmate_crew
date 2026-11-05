@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   chess: ^0.8.1
   simple_chess_board: ^1.12.1
+  stockfish: ^1.8.1
 
 dev_dependencies:
   flutter_test:
