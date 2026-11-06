@@ -23,3 +23,8 @@
 - Source: original procedural synthesis in `tool/generate_sounds.py`; no recordings or third-party samples.
 - Mono, 44.1 kHz, 16-bit PCM WAV. Move is a short wooden click, capture is a double impact, and check is a two-note alert.
 - No third-party sample license applies. The maintainers can choose the repository's distribution license for these original synthesized assets.
+
+## Chess rules and board
+
+- [chess](https://pub.dev/packages/chess): chess rules, legal moves and game status.
+- [simple_chess_board](https://pub.dev/packages/simple_chess_board): board, pieces and move interaction. The board integration follows the package's interactive example, adapted through the team's Checkmate Crew Build Guide (starter part 4).
