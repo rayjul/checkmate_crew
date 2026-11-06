@@ -20,11 +20,46 @@ void main() {
     expect(game.fen, startingFen);
   });
 
+  test(
+    'Computer answers Black once and ignores a stale reply after reset',
+    () async {
+      final game = GameController(vsComputer: true);
+      addTearDown(game.dispose);
+      await game.playComputerMove();
+      expect(game.sideToMove, 'White');
+      expect(game.tryMove(from: 'e2', to: 'e4'), isTrue);
+      final reply = game.playComputerMove();
+      expect(game.isThinking, isTrue);
+      await game.playComputerMove();
+      await reply;
+      expect(game.sideToMove, 'White');
+      expect(game.isThinking, isFalse);
+      expect(game.tryMove(from: 'd2', to: 'd4'), isTrue);
+      final staleReply = game.playComputerMove();
+      game.newGame();
+      final startingFen = game.fen;
+      await staleReply;
+      expect(game.fen, startingFen);
+      expect(game.isThinking, isFalse);
+    },
+  );
+
+  test('Disposing during a computer turn safely discards the reply', () async {
+    final game = GameController(vsComputer: true);
+    game.tryMove(from: 'e2', to: 'e4');
+    final reply = game.playComputerMove();
+    game.dispose();
+    await reply;
+  });
+
   test('Fools mate ends the game with Black winning', () {
     final game = GameController();
     addTearDown(game.dispose);
     for (final move in ['f2f3', 'e7e5', 'g2g4', 'd8h4']) {
-      expect(game.tryMove(from: move.substring(0, 2), to: move.substring(2)), isTrue);
+      expect(
+        game.tryMove(from: move.substring(0, 2), to: move.substring(2)),
+        isTrue,
+      );
     }
     expect(game.isGameOver, isTrue);
     expect(game.status, 'Checkmate – Black wins!');

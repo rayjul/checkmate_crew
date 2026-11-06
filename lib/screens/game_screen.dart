@@ -5,29 +5,38 @@ import '../game/game_controller.dart';
 import '../widgets/game_over_dialog.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, this.vsComputer = false});
+
+  /// True when Black is played by the computer.
+  final bool vsComputer;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  final _game = GameController();
+  late final _game = GameController(vsComputer: widget.vsComputer);
 
   @override
   void dispose() {
-    _game.dispose();
+    _game.dispose(); // also stops the computer engine
     super.dispose();
   }
 
-  void _onMove({required ShortMove move}) {
+  Future<void> _onMove({required ShortMove move}) async {
     final played = _game.tryMove(
       from: move.from,
       to: move.to,
       promotion: move.promotion?.name,
     );
-    if (played && _game.isGameOver) {
-      showGameOverDialog(context, result: _game.status, onPlayAgain: _game.newGame);
+    if (!played) return;
+    await _game.playComputerMove(); // does nothing in two-player games
+    if (_game.isGameOver && mounted) {
+      showGameOverDialog(
+        context,
+        result: _game.status,
+        onPlayAgain: _game.newGame,
+      );
     }
   }
 
@@ -53,7 +62,11 @@ class _GameScreenState extends State<GameScreen> {
     );
     if (yes != true || !mounted) return;
     _game.resign();
-    showGameOverDialog(context, result: _game.status, onPlayAgain: _game.newGame);
+    showGameOverDialog(
+      context,
+      result: _game.status,
+      onPlayAgain: _game.newGame,
+    );
   }
 
   @override
@@ -66,9 +79,17 @@ class _GameScreenState extends State<GameScreen> {
           title: const Text('Checkmate Crew'),
           actions: [
             if (!_game.isGameOver)
-              IconButton(tooltip: 'Resign', icon: const Icon(Icons.flag), onPressed: _confirmResign)
+              IconButton(
+                tooltip: 'Resign',
+                icon: const Icon(Icons.flag),
+                onPressed: _game.isThinking ? null : _confirmResign,
+              )
             else
-              IconButton(tooltip: 'New game', icon: const Icon(Icons.refresh), onPressed: _game.newGame),
+              IconButton(
+                tooltip: 'New game',
+                icon: const Icon(Icons.refresh),
+                onPressed: _game.newGame,
+              ),
           ],
         ),
         body: Column(
@@ -84,18 +105,24 @@ class _GameScreenState extends State<GameScreen> {
                   child: SimpleChessBoard(
                     fen: _game.fen,
                     whitePlayerType: PlayerType.human,
-                    blackPlayerType: PlayerType.human,
+                    blackPlayerType: _game.vsComputer
+                        ? PlayerType.computer
+                        : PlayerType.human,
+                    engineThinking:
+                        _game.isThinking, // spinner while the computer thinks
                     onMove: _onMove,
-                    onPromote: () async => PieceType.queen, // always queen for now
-                    onPromotionCommited: ({required moveDone, required pieceType}) {
-                      moveDone.promotion = pieceType;
-                      _onMove(move: moveDone);
-                    },
+                    onPromote: () async => PieceType
+                        .queen, // or showPromotionDialog(context) (#19)
+                    onPromotionCommited:
+                        ({required moveDone, required pieceType}) {
+                          moveDone.promotion = pieceType;
+                          _onMove(move: moveDone);
+                        },
                     onTap: ({required cellCoordinate}) {},
                     chessBoardColors: ChessBoardColors(),
                     cellHighlights: const {},
                     showPossibleMoves: true,
-                    isInteractive: !_game.isGameOver,
+                    isInteractive: !_game.isGameOver && !_game.isThinking,
                     nonInteractiveText: 'GAME OVER',
                   ),
                 ),

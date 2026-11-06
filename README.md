@@ -13,7 +13,7 @@ Starter part 4 is proposed in [pull request #72](https://github.com/rayjul/check
 - At game over, players can view the final board or play again.
 - Pawn promotion currently selects a queen automatically.
 
-A computer opponent, chess clock, online multiplayer and custom in-game piece graphics are future work. The repository contains artwork and sound assets; starter part 4 does not connect those assets to gameplay. No AI or machine learning opponent is implemented in this branch.
+A stronger computer opponent, chess clock, online multiplayer and custom in-game piece graphics are future work. The repository contains artwork and sound assets; starter part 4 does not connect those assets to gameplay. The random opponent is described below; no machine learning opponent is implemented.
 
 ## Quick start on macOS (Chrome)
 
@@ -51,7 +51,7 @@ flutter analyze
 flutter test
 ```
 
-The branch includes controller tests for illegal moves, resignation, reset and Fool's mate, plus a widget test for the resignation and new-game flow. These tests were added but were not run in the initial authoring environment because Flutter was unavailable. Run them locally before requesting approval.
+The branch includes controller tests for illegal moves, resignation, reset and Fool's mate, plus a widget test for the resignation and new-game flow. Flutter tests passed during the starter part 5 update, including delayed computer replies after reset and disposal. Run the checks again after making changes.
 
 ## Code layout
 
@@ -78,3 +78,15 @@ See [CREDITS.md](CREDITS.md) for package and asset acknowledgments.
 - [Flutter installation](https://docs.flutter.dev/install/manual)
 - [Flutter web setup](https://docs.flutter.dev/platform-integration/web/setup)
 - [Homebrew Flutter package](https://formulae.brew.sh/cask/flutter)
+
+## Starter part 5: random computer opponent
+
+The starter branch also includes the guide's browser-compatible random opponent. To play White against computer-controlled Black, run:
+
+```bash
+flutter run -d chrome --dart-define=VS_COMPUTER=true
+```
+
+Without that flag, the app remains in two-player mode. The computer chooses a random legal move after a short delay; it is not Stockfish or a machine learning engine. The board and resignation control pause during its turn. Real Stockfish remains future work because the guide's native version requires Android/iOS and cannot replace the browser version without breaking Chrome.
+
+To check the computer: play e2 to e4, wait for Black's response, and confirm White can move again. Stop the app and rerun without the flag to verify two-player mode.

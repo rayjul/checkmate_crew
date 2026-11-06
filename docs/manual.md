@@ -4,7 +4,7 @@
 
 Checkmate Crew lets two people play chess on the same device. White moves first, followed by Black. The rules engine checks moves and detects check, checkmate and draws.
 
-This manual describes the starter part 4 branch, `69-starter-part-4`, proposed in [pull request #72](https://github.com/rayjul/checkmate_crew/pull/72). A computer opponent, timer and online multiplayer are planned features, not available controls in this version.
+This manual describes the starter part 4 branch, `69-starter-part-4`, proposed in [pull request #72](https://github.com/rayjul/checkmate_crew/pull/72). A random computer opponent is available as described below; a timer and online multiplayer remain planned features.
 
 ## Install and start
 
@@ -80,3 +80,15 @@ Run `flutter analyze` and `flutter test`, then check these scenarios in Chrome:
 ## Report a problem
 
 Create an issue in the repository with the steps to reproduce, the expected result, what actually happened, and any relevant screenshot or error message. Include your operating system, branch and `flutter --version` output.
+
+## Starter part 5: random computer opponent
+
+The starter branch also includes the guide's browser-compatible random opponent. To play White against computer-controlled Black, run:
+
+```bash
+flutter run -d chrome --dart-define=VS_COMPUTER=true
+```
+
+Without that flag, the app remains in two-player mode. The computer chooses a random legal move after a short delay; it is not Stockfish or a machine learning engine. The board and resignation control pause during its turn. Real Stockfish remains future work because the guide's native version requires Android/iOS and cannot replace the browser version without breaking Chrome.
+
+To check the computer: play e2 to e4, wait for Black's response, and confirm White can move again. Stop the app and rerun without the flag to verify two-player mode.
