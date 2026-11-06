@@ -1,5 +1,5 @@
 import 'package:checkmate_crew/main.dart';
-import 'package:checkmate_crew/screens/game_screen.dart';
+import 'package:checkmate_crew/features/match/presentation/match_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
