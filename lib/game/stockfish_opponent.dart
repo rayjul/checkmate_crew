@@ -1,27 +1,18 @@
-import 'package:stockfish/stockfish.dart';
+// TEMPORARY STAND-IN: Stockfish is disabled so the app also runs in Chrome.
+// To turn Stockfish back on: git checkout HEAD -- lib/game/stockfish_opponent.dart
+import 'package:chess/chess.dart' as chesslib;
 
-/// Asks Stockfish for a move. Android and iOS only.
 class StockfishOpponent {
-  Stockfish? _engine;
+  Future<void> start({int skillLevel = 3}) async {}
 
-  /// Starts the engine. skillLevel: 0 (weakest) – 20 (strongest).
-  Future<void> start({int skillLevel = 3}) async {
-    _engine = await stockfishAsync(); // waits until the engine is ready
-    _engine!.stdin = 'uci';
-    _engine!.stdin = 'setoption name Skill Level value $skillLevel';
-  }
-
-  /// Returns the best move as text like 'e7e5' (or 'e7e8q' for a promotion).
+  /// Plays a random legal move instead of asking Stockfish.
   Future<String> bestMove(String fen, {int thinkMs = 500}) async {
-    final engine = _engine!;
-    final reply = engine.stdout.firstWhere(
-      (line) => line.startsWith('bestmove'),
-    );
-    engine.stdin = 'position fen $fen';
-    engine.stdin = 'go movetime $thinkMs';
-    final line = await reply; // e.g. 'bestmove e7e5 ponder g1f3'
-    return line.split(' ')[1];
+    await Future.delayed(Duration(milliseconds: thinkMs)); // feels like "thinking"
+    final moves = chesslib.Chess.fromFEN(fen).moves({'verbose': true})..shuffle();
+    final move = moves.first as Map;
+    final promotion = (move['flags'] as String).contains('p') ? 'q' : ''; // pawn → queen
+    return '${move['from']}${move['to']}$promotion';
   }
 
-  void dispose() => _engine?.dispose();
+  void dispose() {}
 }
