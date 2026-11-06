@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'features/match/presentation/match_screen.dart';
-
 void main() => runApp(const CheckmateCrewApp());
 
 class CheckmateCrewApp extends StatelessWidget {
@@ -12,7 +10,7 @@ class CheckmateCrewApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Checkmate Crew',
-      home: GameScreen(),
+      home: MainMenuScreen(),
     );
   }
 }
