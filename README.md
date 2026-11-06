@@ -90,3 +90,7 @@ flutter run -d chrome --dart-define=VS_COMPUTER=true
 Without that flag, the app remains in two-player mode. The computer chooses a random legal move after a short delay; it is not Stockfish or a machine learning engine. The board and resignation control pause during its turn. Real Stockfish remains future work because the guide's native version requires Android/iOS and cannot replace the browser version without breaking Chrome.
 
 To check the computer: play e2 to e4, wait for Black's response, and confirm White can move again. Stop the app and rerun without the flag to verify two-player mode.
+
+## Stockfish preparation (#40)
+
+The matching Stockfish.js v19.0.1 lite single-threaded JavaScript and WebAssembly files are now bundled under [`web/stockfish/`](web/stockfish/README.md), together with license, author and source files. They are ready for a future browser-worker integration; the current computer opponent still selects random legal moves. No Stockfish difficulty setting is active in gameplay yet.

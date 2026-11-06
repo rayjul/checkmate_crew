@@ -28,3 +28,10 @@
 
 - [chess](https://pub.dev/packages/chess): chess rules, legal moves and game status.
 - [simple_chess_board](https://pub.dev/packages/simple_chess_board): board, pieces and move interaction. The board integration follows the package's interactive example, adapted through the team's Checkmate Crew Build Guide (starter part 4).
+
+## Stockfish browser engine (bundled, not yet connected)
+
+- Stockfish.js v19.0.1, lite single-threaded browser build, by Nathan Rugg and the Stockfish contributors.
+- Runtime files: `web/stockfish/stockfish-19-lite-single.js` and matching `.wasm`, copied without changes from the [upstream release](https://github.com/nmrugg/stockfish.js/releases/tag/v19.0.1).
+- License: GNU GPL v3; the full license, authors, corresponding source archive, lite evaluation network and provenance are included in [web/stockfish/](web/stockfish/README.md).
+- These are preparation for #40. The playable computer opponent remains random until the browser engine is connected to the game controller.
