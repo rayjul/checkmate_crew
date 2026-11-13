@@ -15,6 +15,7 @@ class MainMenuScreen extends StatefulWidget {
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
   GameSetupOptions _defaultOptions = const GameSetupOptions();
+  int _skillLevel = 3;
 
   void _playMenuSound() {
     if (!kIsWeb) {
@@ -22,10 +23,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     }
   }
 
-  Future<void> _handleOption(
-    BuildContext context,
-    _MenuOptionData option,
-  ) async {
+  Future<void> _handleOption(_MenuOption option) async {
     if (option.destination == _MenuDestination.exit) {
       SystemNavigator.pop();
       return;
@@ -37,60 +35,65 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       initialOptions: _defaultOptions,
       settingsOnly: option.destination == _MenuDestination.settings,
     );
-    if (!context.mounted || options == null) return;
+    if (!mounted || options == null) return;
 
     if (option.destination == _MenuDestination.settings) {
       setState(() => _defaultOptions = options);
       return;
     }
 
-    final Widget screen = switch (option.destination) {
+    final screen = switch (option.destination) {
       _MenuDestination.human => GameScreen(options: options),
+      _MenuDestination.computer => GameScreen(
+        options: options,
+        vsComputer: true,
+        skillLevel: _skillLevel,
+      ),
       _ => _ComingSoonScreen(title: option.title),
     };
-    _openScreen(context, screen);
+    _openScreen(screen);
   }
 
-  void _openScreen(BuildContext context, Widget screen) {
+  void _openScreen(Widget screen) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
-    final menuOptions = <_MenuOptionData>[
-      _MenuOptionData(
+    final menuOptions = <_MenuOption>[
+      const _MenuOption(
         title: 'Play vs Human',
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: Color(0xFF4F46E5),
         destination: _MenuDestination.human,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Play vs Computer',
-        backgroundColor: const Color(0xFF0EA5E9),
+        backgroundColor: Color(0xFF0EA5E9),
         destination: _MenuDestination.computer,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Local multiplayer',
-        backgroundColor: const Color(0xFF14B8A6),
+        backgroundColor: Color(0xFF14B8A6),
         destination: _MenuDestination.local,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Practice / puzzles',
-        backgroundColor: const Color(0xFFF59E0B),
+        backgroundColor: Color(0xFFF59E0B),
         destination: _MenuDestination.practice,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Tutorial / how to play',
-        backgroundColor: const Color(0xFF8B5CF6),
+        backgroundColor: Color(0xFF8B5CF6),
         destination: _MenuDestination.tutorial,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Settings',
-        backgroundColor: const Color(0xFF64748B),
+        backgroundColor: Color(0xFF64748B),
         destination: _MenuDestination.settings,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Exit',
-        backgroundColor: const Color(0xFFDC2626),
+        backgroundColor: Color(0xFFDC2626),
         destination: _MenuDestination.exit,
       ),
     ];
@@ -125,33 +128,42 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     ),
                     const SizedBox(height: 28),
                     ...menuOptions.map((option) {
+                      final isComputerOption =
+                          option.destination == _MenuDestination.computer;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              _playMenuSound();
-                              _handleOption(context, option);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: option.backgroundColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  _playMenuSound();
+                                  _handleOption(option);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: option.backgroundColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: Text(
+                                  option.title,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
-                              elevation: 0,
                             ),
-                            child: Text(
-                              option.title,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+                            if (isComputerOption) _buildDifficultySlider(),
+                          ],
                         ),
                       );
                     }),
@@ -164,10 +176,61 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       ),
     );
   }
+
+  Widget _buildDifficultySlider() {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      decoration: BoxDecoration(
+        color: const Color(0x0FFFFFFF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Computer difficulty',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              Text(
+                'Level $_skillLevel / 20',
+                style: const TextStyle(
+                  color: Color(0xFFD1D5DB),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: _skillLevel.toDouble(),
+            min: 0,
+            max: 20,
+            divisions: 20,
+            label: '$_skillLevel',
+            semanticFormatterCallback: (value) =>
+                'Stockfish level ${value.round()} of 20',
+            onChanged: (value) {
+              setState(() => _skillLevel = value.round());
+            },
+          ),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Easier', style: TextStyle(color: Colors.white70)),
+              Text('Harder', style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _MenuOptionData {
-  const _MenuOptionData({
+class _MenuOption {
+  const _MenuOption({
     required this.title,
     required this.backgroundColor,
     required this.destination,

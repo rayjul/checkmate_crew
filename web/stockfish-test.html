@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Stockfish bridge check</title>
+  </head>
+  <body>
+    <h1>Stockfish bridge check</h1>
+    <p id="status">Starting Stockfish…</p>
+    <script src="stockfish/bridge.js"></script>
+    <script>
+      const status = document.querySelector('#status');
+      const afterE4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+
+      window.stockfishBridge.start(3)
+        .then(() => {
+          status.textContent = 'Engine ready. Asking for a reply to e2–e4…';
+          return window.stockfishBridge.bestMove(afterE4, 500);
+        })
+        .then((move) => {
+          status.textContent = `Stockfish chose ${move}. The bridge is working.`;
+        })
+        .catch((error) => {
+          status.textContent = `Stockfish failed: ${error.message}`;
+          console.error(error);
+        });
+    </script>
+  </body>
+</html>
