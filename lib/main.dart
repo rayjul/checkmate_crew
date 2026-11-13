@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'screens/game_screen.dart';
+import 'screens/main_menu_screen.dart';
 
 void main() => runApp(const CheckmateCrewApp());
 
@@ -12,7 +11,7 @@ class CheckmateCrewApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Checkmate Crew',
-      home: GameScreen(vsComputer: bool.fromEnvironment('VS_COMPUTER')),
+      home: MainMenuScreen(),
     );
   }
 }

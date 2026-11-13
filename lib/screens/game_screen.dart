@@ -19,7 +19,7 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void dispose() {
-    _game.dispose(); // also stops the computer engine
+    _game.dispose();
     super.dispose();
   }
 
@@ -29,8 +29,11 @@ class _GameScreenState extends State<GameScreen> {
       to: move.to,
       promotion: move.promotion?.name,
     );
+
     if (!played) return;
-    await _game.playComputerMove(); // does nothing in two-player games
+
+    await _game.playComputerMove();
+
     if (_game.isGameOver && mounted) {
       showGameOverDialog(
         context,
@@ -40,9 +43,9 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  // Ask first, then the player to move gives up.
   Future<void> _confirmResign() async {
     final winner = _game.sideToMove == 'White' ? 'Black' : 'White';
+
     final yes = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -60,8 +63,11 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
     );
+
     if (yes != true || !mounted) return;
+
     _game.resign();
+
     showGameOverDialog(
       context,
       result: _game.status,
@@ -71,7 +77,6 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuilds the screen every time the controller calls notifyListeners().
     return ListenableBuilder(
       listenable: _game,
       builder: (context, _) => Scaffold(
@@ -96,7 +101,10 @@ class _GameScreenState extends State<GameScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(12),
-              child: Text(_game.status, style: const TextStyle(fontSize: 20)),
+              child: Text(
+                _game.status,
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
             Expanded(
               child: Center(
@@ -108,16 +116,14 @@ class _GameScreenState extends State<GameScreen> {
                     blackPlayerType: _game.vsComputer
                         ? PlayerType.computer
                         : PlayerType.human,
-                    engineThinking:
-                        _game.isThinking, // spinner while the computer thinks
+                    engineThinking: _game.isThinking,
                     onMove: _onMove,
-                    onPromote: () async => PieceType
-                        .queen, // or showPromotionDialog(context) (#19)
+                    onPromote: () async => PieceType.queen,
                     onPromotionCommited:
                         ({required moveDone, required pieceType}) {
-                          moveDone.promotion = pieceType;
-                          _onMove(move: moveDone);
-                        },
+                      moveDone.promotion = pieceType;
+                      _onMove(move: moveDone);
+                    },
                     onTap: ({required cellCoordinate}) {},
                     chessBoardColors: ChessBoardColors(),
                     cellHighlights: const {},
