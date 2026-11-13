@@ -5,12 +5,15 @@ import 'stockfish_opponent.dart';
 
 /// Holds the game and tells the screen when something changes.
 class GameController extends ChangeNotifier {
-  GameController({this.vsComputer = false}) {
-    if (vsComputer) _engine.start(skillLevel: 3);
+  GameController({this.vsComputer = false, this.skillLevel = 3}) {
+    if (vsComputer) _engine.start(skillLevel: skillLevel);
   }
 
   /// True when Black is played by the computer.
   final bool vsComputer;
+
+  /// Stockfish skill setting, from 0 (easiest) to 20 (strongest).
+  final int skillLevel;
   bool isThinking = false;
   bool _disposed = false;
   int _generation = 0;
@@ -70,7 +73,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
     final generation = _generation;
     try {
-      await _engine.start(skillLevel: 3);
+      await _engine.start(skillLevel: skillLevel);
       final move = await _engine.bestMove(fen);
       if (!_disposed && generation == _generation && !isGameOver) {
         playUciMove(move);

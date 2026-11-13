@@ -4,8 +4,15 @@ import 'package:flutter/services.dart';
 
 import 'game_screen.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
+
+  @override
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
+
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  int _skillLevel = 3;
 
   void _playMenuSound() {
     if (!kIsWeb) {
@@ -14,9 +21,7 @@ class MainMenuScreen extends StatelessWidget {
   }
 
   void _openScreen(BuildContext context, Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => screen),
-    );
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
   }
 
   void _handleExit() {
@@ -36,7 +41,7 @@ class MainMenuScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF0EA5E9),
         onPressed: (ctx) => _openScreen(
           ctx,
-          const GameScreen(vsComputer: true),
+          GameScreen(vsComputer: true, skillLevel: _skillLevel),
         ),
       ),
       _MenuOptionData(
@@ -68,7 +73,10 @@ class MainMenuScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF64748B),
         onPressed: (ctx) => _openScreen(
           ctx,
-          const _ComingSoonScreen(title: 'Settings'),
+          _DifficultySettingsScreen(
+            skillLevel: _skillLevel,
+            onSave: (skillLevel) => setState(() => _skillLevel = skillLevel),
+          ),
         ),
       ),
       _MenuOptionData(
@@ -104,10 +112,7 @@ class MainMenuScreen extends StatelessWidget {
                     const Text(
                       'Choose your match',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFFD1D5DB),
-                        fontSize: 18,
-                      ),
+                      style: TextStyle(color: Color(0xFFD1D5DB), fontSize: 18),
                     ),
                     const SizedBox(height: 28),
                     ...menuOptions.map((option) {
@@ -164,6 +169,100 @@ class _MenuOptionData {
   final void Function(BuildContext context) onPressed;
 }
 
+class _DifficultySettingsScreen extends StatefulWidget {
+  const _DifficultySettingsScreen({
+    required this.skillLevel,
+    required this.onSave,
+  });
+
+  final int skillLevel;
+  final ValueChanged<int> onSave;
+
+  @override
+  State<_DifficultySettingsScreen> createState() =>
+      _DifficultySettingsScreenState();
+}
+
+class _DifficultySettingsScreenState extends State<_DifficultySettingsScreen> {
+  late int _skillLevel = widget.skillLevel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF101828),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF101828),
+        foregroundColor: Colors.white,
+        title: const Text('Settings'),
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Computer difficulty',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Stockfish level $_skillLevel of 20',
+                    style: const TextStyle(
+                      color: Color(0xFFD1D5DB),
+                      fontSize: 18,
+                    ),
+                  ),
+                  Slider(
+                    value: _skillLevel.toDouble(),
+                    min: 0,
+                    max: 20,
+                    divisions: 20,
+                    label: '$_skillLevel',
+                    semanticFormatterCallback: (value) =>
+                        'Stockfish level ${value.round()} of 20',
+                    onChanged: (value) {
+                      setState(() => _skillLevel = value.round());
+                    },
+                  ),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Easier', style: TextStyle(color: Colors.white70)),
+                      Text('Harder', style: TextStyle(color: Colors.white70)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Level 0 is easiest; level 20 is strongest. This is an '
+                    'engine setting, not a player rating.',
+                    style: TextStyle(color: Color(0xFFD1D5DB)),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: () {
+                      widget.onSave(_skillLevel);
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Save difficulty'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ComingSoonScreen extends StatelessWidget {
   const _ComingSoonScreen({required this.title});
 
@@ -173,10 +272,7 @@ class _ComingSoonScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF101828),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text(title),
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent, title: Text(title)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -198,10 +294,7 @@ class _ComingSoonScreen extends StatelessWidget {
               const Text(
                 'Coming soon',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFFD1D5DB),
-                  fontSize: 18,
-                ),
+                style: TextStyle(color: Color(0xFFD1D5DB), fontSize: 18),
               ),
             ],
           ),
