@@ -129,7 +129,11 @@ class _GameScreenState extends State<GameScreen> {
                     cellHighlights: const {},
                     showPossibleMoves: true,
                     isInteractive: !_game.isGameOver && !_game.isThinking,
-                    nonInteractiveText: 'GAME OVER',
+                    nonInteractiveText: _game.isGameOver
+                        ? 'GAME OVER'
+                        : _game.isThinking
+                        ? 'Computer is thinking'
+                        : '',
                   ),
                 ),
               ),

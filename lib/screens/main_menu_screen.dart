@@ -36,7 +36,7 @@ class MainMenuScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF0EA5E9),
         onPressed: (ctx) => _openScreen(
           ctx,
-          const _ComingSoonScreen(title: 'Play vs Computer'),
+          const GameScreen(vsComputer: true),
         ),
       ),
       _MenuOptionData(
