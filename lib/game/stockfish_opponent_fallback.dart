@@ -4,7 +4,11 @@ import 'package:chess/chess.dart' as chesslib;
 class StockfishBackend {
   Future<void> start({int skillLevel = 3}) async {}
 
-  Future<String> bestMove(String fen, {int thinkMs = 500}) async {
+  Future<String> bestMove(
+    String fen, {
+    int thinkMs = 500,
+    int skillLevel = 3,
+  }) async {
     await Future<void>.delayed(Duration(milliseconds: thinkMs));
     final moves = chesslib.Chess.fromFEN(fen).moves({'verbose': true})
       ..shuffle();

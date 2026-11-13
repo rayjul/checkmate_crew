@@ -2,6 +2,7 @@ window.stockfishBridge = (() => {
   let worker;
   let readyPromise;
   let busy = false;
+  let activeSkillLevel;
   const cancelPending = new Set();
 
   function waitForReply(matches, timeoutMs = 10000) {
@@ -50,6 +51,7 @@ window.stockfishBridge = (() => {
 
       const clampedSkill = Math.max(0, Math.min(20, skillLevel));
       worker.postMessage(`setoption name Skill Level value ${clampedSkill}`);
+      activeSkillLevel = clampedSkill;
       const engineReady = waitForReply((line) => line === 'readyok');
       worker.postMessage('isready');
       await engineReady;
@@ -58,13 +60,22 @@ window.stockfishBridge = (() => {
     return readyPromise;
   }
 
-  async function bestMove(fen, thinkMs = 500) {
-    await start();
+  async function bestMove(fen, thinkMs = 500, skillLevel = 3) {
+    await start(skillLevel);
 
     if (busy) throw new Error('Stockfish is already thinking.');
     busy = true;
 
     try {
+      const clampedSkill = Math.max(0, Math.min(20, skillLevel));
+      if (clampedSkill !== activeSkillLevel) {
+        const engineReady = waitForReply((line) => line === 'readyok');
+        worker.postMessage(`setoption name Skill Level value ${clampedSkill}`);
+        worker.postMessage('isready');
+        await engineReady;
+        activeSkillLevel = clampedSkill;
+      }
+
       const reply = waitForReply((line) => line.startsWith('bestmove '));
       worker.postMessage(`position fen ${fen}`);
       worker.postMessage(`go movetime ${thinkMs}`);
@@ -88,6 +99,7 @@ window.stockfishBridge = (() => {
     worker = undefined;
     readyPromise = undefined;
     busy = false;
+    activeSkillLevel = undefined;
   }
 
   return { start, bestMove, dispose };
