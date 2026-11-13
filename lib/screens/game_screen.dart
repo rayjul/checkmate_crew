@@ -5,17 +5,23 @@ import '../game/game_controller.dart';
 import '../widgets/game_over_dialog.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, this.vsComputer = false});
+  const GameScreen({super.key, this.vsComputer = false, this.skillLevel = 3});
 
   /// True when Black is played by the computer.
   final bool vsComputer;
+
+  /// Stockfish skill setting, from 0 (easiest) to 20 (strongest).
+  final int skillLevel;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late final _game = GameController(vsComputer: widget.vsComputer);
+  late final _game = GameController(
+    vsComputer: widget.vsComputer,
+    skillLevel: widget.skillLevel,
+  );
 
   @override
   void dispose() {
@@ -101,10 +107,7 @@ class _GameScreenState extends State<GameScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(12),
-              child: Text(
-                _game.status,
-                style: const TextStyle(fontSize: 20),
-              ),
+              child: Text(_game.status, style: const TextStyle(fontSize: 20)),
             ),
             Expanded(
               child: Center(
@@ -121,9 +124,9 @@ class _GameScreenState extends State<GameScreen> {
                     onPromote: () async => PieceType.queen,
                     onPromotionCommited:
                         ({required moveDone, required pieceType}) {
-                      moveDone.promotion = pieceType;
-                      _onMove(move: moveDone);
-                    },
+                          moveDone.promotion = pieceType;
+                          _onMove(move: moveDone);
+                        },
                     onTap: ({required cellCoordinate}) {},
                     chessBoardColors: ChessBoardColors(),
                     cellHighlights: const {},
