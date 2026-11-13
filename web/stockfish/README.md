@@ -4,7 +4,7 @@ Unmodified Stockfish.js **v19.0.1**, based on Stockfish 19, by Nathan Rugg and t
 
 ## Status
 
-These files are bundled in preparation for issue #40. They are not connected to the Flutter game yet. Computer mode still uses random legal moves.
+These files are connected to the Chrome computer mode for issue #40. Non-web builds use the random legal-move fallback.
 
 ## Runtime files
 

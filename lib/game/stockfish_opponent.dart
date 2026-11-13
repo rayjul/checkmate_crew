@@ -1,23 +1,15 @@
-// STAND-IN: plays a random legal move so the app also runs in Chrome.
-// For the real Stockfish engine (phones only), use the version below.
-import 'package:chess/chess.dart' as chesslib;
+import 'stockfish_opponent_fallback.dart'
+    if (dart.library.js_interop) 'stockfish_opponent_web.dart' as platform;
 
+/// Provides a computer move using the current platform's engine backend.
 class StockfishOpponent {
-  Future<void> start({int skillLevel = 3}) async {}
+  final platform.StockfishBackend _backend = platform.StockfishBackend();
 
-  /// Plays a random legal move instead of asking Stockfish.
-  Future<String> bestMove(String fen, {int thinkMs = 500}) async {
-    await Future.delayed(
-      Duration(milliseconds: thinkMs),
-    ); // feels like "thinking"
-    final moves = chesslib.Chess.fromFEN(fen).moves({'verbose': true})
-      ..shuffle();
-    final move = moves.first as Map;
-    final promotion = (move['flags'] as String).contains('p')
-        ? 'q'
-        : ''; // pawn -> queen
-    return '${move['from']}${move['to']}$promotion';
-  }
+  Future<void> start({int skillLevel = 3}) =>
+      _backend.start(skillLevel: skillLevel);
 
-  void dispose() {}
+  Future<String> bestMove(String fen, {int thinkMs = 500}) =>
+      _backend.bestMove(fen, thinkMs: thinkMs);
+
+  void dispose() => _backend.dispose();
 }

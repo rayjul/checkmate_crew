@@ -14,6 +14,7 @@ class GameController extends ChangeNotifier {
   bool isThinking = false;
   bool _disposed = false;
   int _generation = 0;
+  String? _computerError;
 
   final chesslib.Chess _chess = chesslib.Chess();
   final _engine = StockfishOpponent();
@@ -26,6 +27,9 @@ class GameController extends ChangeNotifier {
 
   /// Text for the screen. At checkmate the side "to move" has lost.
   String get status {
+    if (_computerError != null) {
+      return 'Computer unavailable. Please start a new game.';
+    }
     if (_resignedBy != null) {
       final winner = _resignedBy == 'White' ? 'Black' : 'White';
       return '$_resignedBy resigns – $winner wins!';
@@ -66,9 +70,14 @@ class GameController extends ChangeNotifier {
     notifyListeners();
     final generation = _generation;
     try {
+      await _engine.start(skillLevel: 3);
       final move = await _engine.bestMove(fen);
       if (!_disposed && generation == _generation && !isGameOver) {
         playUciMove(move);
+      }
+    } catch (error) {
+      if (!_disposed && generation == _generation) {
+        _computerError = error.toString();
       }
     } finally {
       if (!_disposed && generation == _generation) {
@@ -90,6 +99,7 @@ class GameController extends ChangeNotifier {
     isThinking = false;
     _chess.reset();
     _resignedBy = null;
+    _computerError = null;
     notifyListeners();
   }
 

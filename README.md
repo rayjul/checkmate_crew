@@ -4,7 +4,7 @@ Checkmate Crew is a team-built Flutter chess app. It uses the `chess` package to
 
 ## Project status
 
-Starter part 4 is proposed in [pull request #72](https://github.com/rayjul/checkmate_crew/pull/72), on branch `69-starter-part-4`. The features below describe that branch; they are not a claim that the work has merged into `main` or passed runtime testing.
+Starter parts 4 and 5 and the browser Stockfish integration are on branch `69-starter-part-4`, proposed in [pull request #72](https://github.com/rayjul/checkmate_crew/pull/72). The branch has not been merged into `main`.
 
 - Two people play on the same device, taking turns as White and Black.
 - Legal moves update the board; illegal moves are rejected.
@@ -13,7 +13,7 @@ Starter part 4 is proposed in [pull request #72](https://github.com/rayjul/check
 - At game over, players can view the final board or play again.
 - Pawn promotion currently selects a queen automatically.
 
-A stronger computer opponent, chess clock, online multiplayer and custom in-game piece graphics are future work. The repository contains artwork and sound assets; starter part 4 does not connect those assets to gameplay. The random opponent is described below; no machine learning opponent is implemented.
+On Chrome, the optional computer opponent uses the bundled Stockfish.js engine. Non-web builds use the random-move fallback. A chess clock, online multiplayer and custom in-game piece graphics remain future work.
 
 ## Quick start on macOS (Chrome)
 
@@ -51,7 +51,7 @@ flutter analyze
 flutter test
 ```
 
-The branch includes controller tests for illegal moves, resignation, reset and Fool's mate, plus a widget test for the resignation and new-game flow. Flutter tests passed during the starter part 5 update, including delayed computer replies after reset and disposal. Run the checks again after making changes.
+The branch includes controller tests for illegal moves, resignation, reset and Fool's mate, plus a widget test for the resignation and new-game flow. Run the checks after making changes.
 
 ## Code layout
 
@@ -79,18 +79,16 @@ See [CREDITS.md](CREDITS.md) for package and asset acknowledgments.
 - [Flutter web setup](https://docs.flutter.dev/platform-integration/web/setup)
 - [Homebrew Flutter package](https://formulae.brew.sh/cask/flutter)
 
-## Starter part 5: random computer opponent
+## Play against the computer
 
-The starter branch also includes the guide's browser-compatible random opponent. To play White against computer-controlled Black, run:
+The Chrome build uses the bundled Stockfish engine locally. To play White against computer-controlled Black, run:
 
 ```bash
 flutter run -d chrome --dart-define=VS_COMPUTER=true
 ```
 
-Without that flag, the app remains in two-player mode. The computer chooses a random legal move after a short delay; it is not Stockfish or a machine learning engine. The board and resignation control pause during its turn. Real Stockfish remains future work because the guide's native version requires Android/iOS and cannot replace the browser version without breaking Chrome.
+Without that flag, the app remains in two-player mode. With it, Black uses the browser Stockfish engine and the board pauses while Stockfish thinks. The local non-web build uses random legal moves as a fallback.
 
 To check the computer: play e2 to e4, wait for Black's response, and confirm White can move again. Stop the app and rerun without the flag to verify two-player mode.
 
-## Stockfish preparation (#40)
-
-The matching Stockfish.js v19.0.1 lite single-threaded JavaScript and WebAssembly files are now bundled under [`web/stockfish/`](web/stockfish/README.md), together with license, author and source files. They are ready for a future browser-worker integration; the current computer opponent still selects random legal moves. No Stockfish difficulty setting is active in gameplay yet.
+The matching Stockfish.js v19.0.1 lite single-threaded JavaScript and WebAssembly files, license, authors and source are under [`web/stockfish/`](web/stockfish/README.md). Chrome runs Stockfish locally in a browser worker; non-web builds use random legal moves.
