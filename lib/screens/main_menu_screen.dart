@@ -71,13 +71,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       _MenuOptionData(
         title: 'Settings',
         backgroundColor: const Color(0xFF64748B),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          _DifficultySettingsScreen(
-            skillLevel: _skillLevel,
-            onSave: (skillLevel) => setState(() => _skillLevel = skillLevel),
-          ),
-        ),
+        onPressed: (ctx) =>
+            _openScreen(ctx, const _ComingSoonScreen(title: 'Settings')),
       ),
       _MenuOptionData(
         title: 'Exit',
@@ -116,33 +111,42 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     ),
                     const SizedBox(height: 28),
                     ...menuOptions.map((option) {
+                      final isComputerOption =
+                          option.title == 'Play vs Computer';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              _playMenuSound();
-                              option.onPressed(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: option.backgroundColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  _playMenuSound();
+                                  option.onPressed(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: option.backgroundColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: Text(
+                                  option.title,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
-                              elevation: 0,
                             ),
-                            child: Text(
-                              option.title,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+                            if (isComputerOption) _buildDifficultySlider(),
+                          ],
                         ),
                       );
                     }),
@@ -152,6 +156,57 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDifficultySlider() {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      decoration: BoxDecoration(
+        color: const Color(0x0FFFFFFF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Computer difficulty',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              Text(
+                'Level $_skillLevel / 20',
+                style: const TextStyle(
+                  color: Color(0xFFD1D5DB),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: _skillLevel.toDouble(),
+            min: 0,
+            max: 20,
+            divisions: 20,
+            label: '$_skillLevel',
+            semanticFormatterCallback: (value) =>
+                'Stockfish level ${value.round()} of 20',
+            onChanged: (value) {
+              setState(() => _skillLevel = value.round());
+            },
+          ),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Easier', style: TextStyle(color: Colors.white70)),
+              Text('Harder', style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -167,100 +222,6 @@ class _MenuOptionData {
   final String title;
   final Color backgroundColor;
   final void Function(BuildContext context) onPressed;
-}
-
-class _DifficultySettingsScreen extends StatefulWidget {
-  const _DifficultySettingsScreen({
-    required this.skillLevel,
-    required this.onSave,
-  });
-
-  final int skillLevel;
-  final ValueChanged<int> onSave;
-
-  @override
-  State<_DifficultySettingsScreen> createState() =>
-      _DifficultySettingsScreenState();
-}
-
-class _DifficultySettingsScreenState extends State<_DifficultySettingsScreen> {
-  late int _skillLevel = widget.skillLevel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF101828),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF101828),
-        foregroundColor: Colors.white,
-        title: const Text('Settings'),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Computer difficulty',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Stockfish level $_skillLevel of 20',
-                    style: const TextStyle(
-                      color: Color(0xFFD1D5DB),
-                      fontSize: 18,
-                    ),
-                  ),
-                  Slider(
-                    value: _skillLevel.toDouble(),
-                    min: 0,
-                    max: 20,
-                    divisions: 20,
-                    label: '$_skillLevel',
-                    semanticFormatterCallback: (value) =>
-                        'Stockfish level ${value.round()} of 20',
-                    onChanged: (value) {
-                      setState(() => _skillLevel = value.round());
-                    },
-                  ),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Easier', style: TextStyle(color: Colors.white70)),
-                      Text('Harder', style: TextStyle(color: Colors.white70)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Level 0 is easiest; level 20 is strongest. This is an '
-                    'engine setting, not a player rating.',
-                    style: TextStyle(color: Color(0xFFD1D5DB)),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: () {
-                      widget.onSave(_skillLevel);
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Save difficulty'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _ComingSoonScreen extends StatelessWidget {
