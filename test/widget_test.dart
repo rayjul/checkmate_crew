@@ -9,5 +9,7 @@ void main() {
     expect(find.byType(MainMenuScreen), findsOneWidget);
     expect(find.text('Checkmate Crew'), findsOneWidget);
     expect(find.text('Play vs Human'), findsOneWidget);
+    expect(find.text('Practice / puzzles'), findsNothing);
+    expect(find.text('Tutorial / how to play'), findsNothing);
   });
 }

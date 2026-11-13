@@ -48,22 +48,6 @@ class MainMenuScreen extends StatelessWidget {
         ),
       ),
       _MenuOptionData(
-        title: 'Practice / puzzles',
-        backgroundColor: const Color(0xFFF59E0B),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Practice / puzzles'),
-        ),
-      ),
-      _MenuOptionData(
-        title: 'Tutorial / how to play',
-        backgroundColor: const Color(0xFF8B5CF6),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Tutorial / how to play'),
-        ),
-      ),
-      _MenuOptionData(
         title: 'Settings',
         backgroundColor: const Color(0xFF64748B),
         onPressed: (ctx) => _openScreen(
