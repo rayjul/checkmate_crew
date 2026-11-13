@@ -5,7 +5,11 @@ external JSObject get _stockfishBridge;
 
 extension type _StockfishBridge(JSObject _) implements JSObject {
   external JSPromise<JSAny?> start(JSNumber skillLevel);
-  external JSPromise<JSString> bestMove(JSString fen, JSNumber thinkMs);
+  external JSPromise<JSString> bestMove(
+    JSString fen,
+    JSNumber thinkMs,
+    JSNumber skillLevel,
+  );
   external void dispose();
 }
 
@@ -17,8 +21,14 @@ class StockfishBackend {
     await _bridge.start(skillLevel.toJS).toDart;
   }
 
-  Future<String> bestMove(String fen, {int thinkMs = 500}) async {
-    final move = await _bridge.bestMove(fen.toJS, thinkMs.toJS).toDart;
+  Future<String> bestMove(
+    String fen, {
+    int thinkMs = 500,
+    int skillLevel = 3,
+  }) async {
+    final move = await _bridge
+        .bestMove(fen.toJS, thinkMs.toJS, skillLevel.toJS)
+        .toDart;
     return move.toDart;
   }
 

@@ -5,15 +5,18 @@ import 'stockfish_opponent.dart';
 
 /// Holds the game and tells the screen when something changes.
 class GameController extends ChangeNotifier {
-  GameController({this.vsComputer = false, this.skillLevel = 3}) {
-    if (vsComputer) _engine.start(skillLevel: skillLevel);
+  GameController({this.vsComputer = false, int skillLevel = 3})
+    : _skillLevel = skillLevel.clamp(0, 20).toInt() {
+    if (vsComputer) _engine.start(skillLevel: _skillLevel);
   }
 
   /// True when Black is played by the computer.
   final bool vsComputer;
 
   /// Stockfish skill setting, from 0 (easiest) to 20 (strongest).
-  final int skillLevel;
+  int _skillLevel;
+
+  int get skillLevel => _skillLevel;
   bool isThinking = false;
   bool _disposed = false;
   int _generation = 0;
@@ -27,6 +30,14 @@ class GameController extends ChangeNotifier {
   String get sideToMove =>
       _chess.turn == chesslib.Color.WHITE ? 'White' : 'Black';
   bool get isGameOver => _resignedBy != null || _chess.game_over;
+
+  /// Changes the Stockfish level for the next computer move.
+  void setSkillLevel(int skillLevel) {
+    final nextLevel = skillLevel.clamp(0, 20).toInt();
+    if (nextLevel == _skillLevel) return;
+    _skillLevel = nextLevel;
+    notifyListeners();
+  }
 
   /// Text for the screen. At checkmate the side "to move" has lost.
   String get status {
@@ -73,8 +84,8 @@ class GameController extends ChangeNotifier {
     notifyListeners();
     final generation = _generation;
     try {
-      await _engine.start(skillLevel: skillLevel);
-      final move = await _engine.bestMove(fen);
+      await _engine.start(skillLevel: _skillLevel);
+      final move = await _engine.bestMove(fen, skillLevel: _skillLevel);
       if (!_disposed && generation == _generation && !isGameOver) {
         playUciMove(move);
       }

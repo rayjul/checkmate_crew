@@ -4,15 +4,8 @@ import 'package:flutter/services.dart';
 
 import 'game_screen.dart';
 
-class MainMenuScreen extends StatefulWidget {
+class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
-
-  @override
-  State<MainMenuScreen> createState() => _MainMenuScreenState();
-}
-
-class _MainMenuScreenState extends State<MainMenuScreen> {
-  int _skillLevel = 3;
 
   void _playMenuSound() {
     if (!kIsWeb) {
@@ -39,10 +32,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       _MenuOptionData(
         title: 'Play vs Computer',
         backgroundColor: const Color(0xFF0EA5E9),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          GameScreen(vsComputer: true, skillLevel: _skillLevel),
-        ),
+        onPressed: (ctx) =>
+            _openScreen(ctx, const GameScreen(vsComputer: true)),
       ),
       _MenuOptionData(
         title: 'Local multiplayer',
@@ -111,42 +102,33 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     ),
                     const SizedBox(height: 28),
                     ...menuOptions.map((option) {
-                      final isComputerOption =
-                          option.title == 'Play vs Computer';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _playMenuSound();
-                                  option.onPressed(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: option.backgroundColor,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 18,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: Text(
-                                  option.title,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _playMenuSound();
+                              option.onPressed(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: option.backgroundColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              option.title,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            if (isComputerOption) _buildDifficultySlider(),
-                          ],
+                          ),
                         ),
                       );
                     }),
@@ -156,57 +138,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDifficultySlider() {
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      decoration: BoxDecoration(
-        color: const Color(0x0FFFFFFF),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Computer difficulty',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-              Text(
-                'Level $_skillLevel / 20',
-                style: const TextStyle(
-                  color: Color(0xFFD1D5DB),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          Slider(
-            value: _skillLevel.toDouble(),
-            min: 0,
-            max: 20,
-            divisions: 20,
-            label: '$_skillLevel',
-            semanticFormatterCallback: (value) =>
-                'Stockfish level ${value.round()} of 20',
-            onChanged: (value) {
-              setState(() => _skillLevel = value.round());
-            },
-          ),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Easier', style: TextStyle(color: Colors.white70)),
-              Text('Harder', style: TextStyle(color: Colors.white70)),
-            ],
-          ),
-        ],
       ),
     );
   }
