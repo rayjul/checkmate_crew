@@ -2,10 +2,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/game_setup_options.dart';
+import '../widgets/game_setup_dialog.dart';
 import 'game_screen.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
+
+  @override
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
+
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  GameSetupOptions _defaultOptions = const GameSetupOptions();
 
   void _playMenuSound() {
     if (!kIsWeb) {
@@ -13,14 +22,37 @@ class MainMenuScreen extends StatelessWidget {
     }
   }
 
-  void _openScreen(BuildContext context, Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => screen),
+  Future<void> _handleOption(
+    BuildContext context,
+    _MenuOptionData option,
+  ) async {
+    if (option.destination == _MenuDestination.exit) {
+      SystemNavigator.pop();
+      return;
+    }
+
+    final options = await showGameSetupDialog(
+      context,
+      modeTitle: option.title,
+      initialOptions: _defaultOptions,
+      settingsOnly: option.destination == _MenuDestination.settings,
     );
+    if (!context.mounted || options == null) return;
+
+    if (option.destination == _MenuDestination.settings) {
+      setState(() => _defaultOptions = options);
+      return;
+    }
+
+    final Widget screen = switch (option.destination) {
+      _MenuDestination.human => GameScreen(options: options),
+      _ => _ComingSoonScreen(title: option.title),
+    };
+    _openScreen(context, screen);
   }
 
-  void _handleExit() {
-    SystemNavigator.pop();
+  void _openScreen(BuildContext context, Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
   }
 
   @override
@@ -29,52 +61,37 @@ class MainMenuScreen extends StatelessWidget {
       _MenuOptionData(
         title: 'Play vs Human',
         backgroundColor: const Color(0xFF4F46E5),
-        onPressed: (ctx) => _openScreen(ctx, const GameScreen()),
+        destination: _MenuDestination.human,
       ),
       _MenuOptionData(
         title: 'Play vs Computer',
         backgroundColor: const Color(0xFF0EA5E9),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Play vs Computer'),
-        ),
+        destination: _MenuDestination.computer,
       ),
       _MenuOptionData(
         title: 'Local multiplayer',
         backgroundColor: const Color(0xFF14B8A6),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Local multiplayer'),
-        ),
+        destination: _MenuDestination.local,
       ),
       _MenuOptionData(
         title: 'Practice / puzzles',
         backgroundColor: const Color(0xFFF59E0B),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Practice / puzzles'),
-        ),
+        destination: _MenuDestination.practice,
       ),
       _MenuOptionData(
         title: 'Tutorial / how to play',
         backgroundColor: const Color(0xFF8B5CF6),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Tutorial / how to play'),
-        ),
+        destination: _MenuDestination.tutorial,
       ),
       _MenuOptionData(
         title: 'Settings',
         backgroundColor: const Color(0xFF64748B),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Settings'),
-        ),
+        destination: _MenuDestination.settings,
       ),
       _MenuOptionData(
         title: 'Exit',
         backgroundColor: const Color(0xFFDC2626),
-        onPressed: (_) => _handleExit(),
+        destination: _MenuDestination.exit,
       ),
     ];
 
@@ -104,10 +121,7 @@ class MainMenuScreen extends StatelessWidget {
                     const Text(
                       'Choose your match',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFFD1D5DB),
-                        fontSize: 18,
-                      ),
+                      style: TextStyle(color: Color(0xFFD1D5DB), fontSize: 18),
                     ),
                     const SizedBox(height: 28),
                     ...menuOptions.map((option) {
@@ -118,7 +132,7 @@ class MainMenuScreen extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () {
                               _playMenuSound();
-                              option.onPressed(context);
+                              _handleOption(context, option);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: option.backgroundColor,
@@ -156,12 +170,22 @@ class _MenuOptionData {
   const _MenuOptionData({
     required this.title,
     required this.backgroundColor,
-    required this.onPressed,
+    required this.destination,
   });
 
   final String title;
   final Color backgroundColor;
-  final void Function(BuildContext context) onPressed;
+  final _MenuDestination destination;
+}
+
+enum _MenuDestination {
+  human,
+  computer,
+  local,
+  practice,
+  tutorial,
+  settings,
+  exit,
 }
 
 class _ComingSoonScreen extends StatelessWidget {
@@ -173,10 +197,7 @@ class _ComingSoonScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF101828),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text(title),
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent, title: Text(title)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -198,10 +219,7 @@ class _ComingSoonScreen extends StatelessWidget {
               const Text(
                 'Coming soon',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFFD1D5DB),
-                  fontSize: 18,
-                ),
+                style: TextStyle(color: Color(0xFFD1D5DB), fontSize: 18),
               ),
             ],
           ),
