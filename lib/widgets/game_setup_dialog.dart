@@ -7,6 +7,7 @@ Future<GameSetupOptions?> showGameSetupDialog(
   required String modeTitle,
   required GameSetupOptions initialOptions,
   bool settingsOnly = false,
+  bool showComputerDifficulty = false,
 }) {
   return showDialog<GameSetupOptions>(
     context: context,
@@ -14,6 +15,7 @@ Future<GameSetupOptions?> showGameSetupDialog(
       modeTitle: modeTitle,
       initialOptions: initialOptions,
       settingsOnly: settingsOnly,
+      showComputerDifficulty: showComputerDifficulty,
     ),
   );
 }
@@ -23,11 +25,13 @@ class _GameSetupDialog extends StatefulWidget {
     required this.modeTitle,
     required this.initialOptions,
     required this.settingsOnly,
+    required this.showComputerDifficulty,
   });
 
   final String modeTitle;
   final GameSetupOptions initialOptions;
   final bool settingsOnly;
+  final bool showComputerDifficulty;
 
   @override
   State<_GameSetupDialog> createState() => _GameSetupDialogState();
@@ -37,6 +41,7 @@ class _GameSetupDialogState extends State<_GameSetupDialog> {
   late bool _useTimer = widget.initialOptions.useTimer;
   late Duration _timeLimit = widget.initialOptions.timeLimit;
   late ChessBoardScheme _boardScheme = widget.initialOptions.boardScheme;
+  late int _skillLevel = widget.initialOptions.skillLevel;
 
   static const _timeLimits = [
     Duration(minutes: 3),
@@ -51,6 +56,7 @@ class _GameSetupDialogState extends State<_GameSetupDialog> {
         useTimer: _useTimer,
         timeLimit: _timeLimit,
         boardScheme: _boardScheme,
+        skillLevel: _skillLevel,
       ),
     );
   }
@@ -107,6 +113,32 @@ class _GameSetupDialogState extends State<_GameSetupDialog> {
                 }
               },
             ),
+            if (widget.showComputerDifficulty) ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Computer difficulty'),
+                  Text('Level $_skillLevel / 20'),
+                ],
+              ),
+              Slider(
+                value: _skillLevel.toDouble(),
+                min: 0,
+                max: 20,
+                divisions: 20,
+                label: '$_skillLevel',
+                semanticFormatterCallback: (value) =>
+                    'Stockfish level ${value.round()} of 20',
+                onChanged: (value) {
+                  setState(() => _skillLevel = value.round());
+                },
+              ),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [Text('Easier'), Text('Harder')],
+              ),
+            ],
           ],
         ),
       ),

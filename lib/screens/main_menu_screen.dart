@@ -33,6 +33,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       modeTitle: option.title,
       initialOptions: _defaultOptions,
       settingsOnly: option.destination == _MenuDestination.settings,
+      showComputerDifficulty: option.destination == _MenuDestination.computer,
     );
     if (!mounted || options == null) return;
 
@@ -46,6 +47,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       _MenuDestination.computer => GameScreen(
         options: options,
         vsComputer: true,
+        skillLevel: options.skillLevel,
       ),
       _ => _ComingSoonScreen(title: option.title),
     };
