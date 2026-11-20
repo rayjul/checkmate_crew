@@ -1,5 +1,6 @@
 import 'package:checkmate_crew/main.dart';
 import 'package:checkmate_crew/screens/main_menu_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,10 +12,39 @@ void main() {
     expect(find.text('Play vs Human'), findsOneWidget);
   });
 
+  testWidgets('game mode opens setup with timer and board options', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const CheckmateCrewApp());
+
+    await tester.tap(find.text('Play vs Human'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Use a timer'), findsOneWidget);
+    expect(find.text('Board colors'), findsOneWidget);
+
+    expect(
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+      isFalse,
+    );
+    await tester.tap(find.text('Use a timer'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+      isTrue,
+    );
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MainMenuScreen), findsOneWidget);
+  });
+
   testWidgets('Cancel resignation, resign and play again', (tester) async {
     await tester.pumpWidget(const CheckmateCrewApp());
 
     await tester.tap(find.text('Play vs Human'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start game'));
     await tester.pumpAndSettle();
 
     expect(find.text('White to move'), findsOneWidget);
