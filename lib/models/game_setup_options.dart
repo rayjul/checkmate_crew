@@ -30,9 +30,11 @@ class GameSetupOptions {
     this.useTimer = false,
     this.timeLimit = const Duration(minutes: 5),
     this.boardScheme = ChessBoardScheme.classic,
+    this.skillLevel = 3,
   });
 
   final bool useTimer;
   final Duration timeLimit;
   final ChessBoardScheme boardScheme;
+  final int skillLevel;
 }
