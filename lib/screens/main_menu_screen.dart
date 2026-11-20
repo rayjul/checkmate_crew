@@ -2,10 +2,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/game_setup_options.dart';
+import '../widgets/game_setup_dialog.dart';
 import 'game_screen.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
+
+  @override
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
+
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  GameSetupOptions _defaultOptions = const GameSetupOptions();
 
   void _playMenuSound() {
     if (!kIsWeb) {
@@ -13,62 +22,63 @@ class MainMenuScreen extends StatelessWidget {
     }
   }
 
-  void _openScreen(BuildContext context, Widget screen) {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
-  }
+  Future<void> _handleOption(_MenuOption option) async {
+    if (option.destination == _MenuDestination.exit) {
+      SystemNavigator.pop();
+      return;
+    }
 
-  void _handleExit() {
-    SystemNavigator.pop();
+    final options = await showGameSetupDialog(
+      context,
+      modeTitle: option.title,
+      initialOptions: _defaultOptions,
+      settingsOnly: option.destination == _MenuDestination.settings,
+    );
+    if (!mounted || options == null) return;
+
+    if (option.destination == _MenuDestination.settings) {
+      setState(() => _defaultOptions = options);
+      return;
+    }
+
+    final screen = switch (option.destination) {
+      _MenuDestination.human => GameScreen(options: options),
+      _MenuDestination.computer => GameScreen(
+        options: options,
+        vsComputer: true,
+      ),
+      _ => _ComingSoonScreen(title: option.title),
+    };
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
-    final menuOptions = <_MenuOptionData>[
-      _MenuOptionData(
+    final menuOptions = <_MenuOption>[
+      const _MenuOption(
         title: 'Play vs Human',
-        backgroundColor: const Color(0xFF4F46E5),
-        onPressed: (ctx) => _openScreen(ctx, const GameScreen()),
+        backgroundColor: Color(0xFF4F46E5),
+        destination: _MenuDestination.human,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Play vs Computer',
-        backgroundColor: const Color(0xFF0EA5E9),
-        onPressed: (ctx) =>
-            _openScreen(ctx, const GameScreen(vsComputer: true)),
+        backgroundColor: Color(0xFF0EA5E9),
+        destination: _MenuDestination.computer,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Local multiplayer',
-        backgroundColor: const Color(0xFF14B8A6),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Local multiplayer'),
-        ),
+        backgroundColor: Color(0xFF14B8A6),
+        destination: _MenuDestination.local,
       ),
-      _MenuOptionData(
-        title: 'Practice / puzzles',
-        backgroundColor: const Color(0xFFF59E0B),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Practice / puzzles'),
-        ),
-      ),
-      _MenuOptionData(
-        title: 'Tutorial / how to play',
-        backgroundColor: const Color(0xFF8B5CF6),
-        onPressed: (ctx) => _openScreen(
-          ctx,
-          const _ComingSoonScreen(title: 'Tutorial / how to play'),
-        ),
-      ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Settings',
-        backgroundColor: const Color(0xFF64748B),
-        onPressed: (ctx) =>
-            _openScreen(ctx, const _ComingSoonScreen(title: 'Settings')),
+        backgroundColor: Color(0xFF64748B),
+        destination: _MenuDestination.settings,
       ),
-      _MenuOptionData(
+      const _MenuOption(
         title: 'Exit',
-        backgroundColor: const Color(0xFFDC2626),
-        onPressed: (_) => _handleExit(),
+        backgroundColor: Color(0xFFDC2626),
+        destination: _MenuDestination.exit,
       ),
     ];
 
@@ -101,15 +111,15 @@ class MainMenuScreen extends StatelessWidget {
                       style: TextStyle(color: Color(0xFFD1D5DB), fontSize: 18),
                     ),
                     const SizedBox(height: 28),
-                    ...menuOptions.map((option) {
-                      return Padding(
+                    ...menuOptions.map(
+                      (option) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
                               _playMenuSound();
-                              option.onPressed(context);
+                              _handleOption(option);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: option.backgroundColor,
@@ -130,8 +140,8 @@ class MainMenuScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                      );
-                    }),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -143,17 +153,19 @@ class MainMenuScreen extends StatelessWidget {
   }
 }
 
-class _MenuOptionData {
-  const _MenuOptionData({
+class _MenuOption {
+  const _MenuOption({
     required this.title,
     required this.backgroundColor,
-    required this.onPressed,
+    required this.destination,
   });
 
   final String title;
   final Color backgroundColor;
-  final void Function(BuildContext context) onPressed;
+  final _MenuDestination destination;
 }
+
+enum _MenuDestination { human, computer, local, settings, exit }
 
 class _ComingSoonScreen extends StatelessWidget {
   const _ComingSoonScreen({required this.title});
