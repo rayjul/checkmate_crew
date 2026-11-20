@@ -24,12 +24,20 @@ class GameController extends ChangeNotifier {
 
   final chesslib.Chess _chess = chesslib.Chess();
   final _engine = StockfishOpponent();
+  final Map<chesslib.Color, List<chesslib.PieceType>> _capturedPieces = {
+    chesslib.Color.WHITE: [],
+    chesslib.Color.BLACK: [],
+  };
   String? _resignedBy; // 'White' or 'Black' after a resignation
 
   String get fen => _chess.fen;
   String get sideToMove =>
       _chess.turn == chesslib.Color.WHITE ? 'White' : 'Black';
   bool get isGameOver => _resignedBy != null || _chess.game_over;
+  List<chesslib.PieceType> get capturedByWhite =>
+      List.unmodifiable(_capturedPieces[chesslib.Color.WHITE]!);
+  List<chesslib.PieceType> get capturedByBlack =>
+      List.unmodifiable(_capturedPieces[chesslib.Color.BLACK]!);
 
   /// Changes the Stockfish level for the next computer move.
   void setSkillLevel(int skillLevel) {
@@ -60,7 +68,13 @@ class GameController extends ChangeNotifier {
   bool tryMove({required String from, required String to, String? promotion}) {
     if (isGameOver) return false;
     final ok = _chess.move({'from': from, 'to': to, 'promotion': promotion});
-    if (ok) notifyListeners();
+    if (ok) {
+      final move = _chess.history.last.move;
+      if (move.captured != null) {
+        _capturedPieces[move.color]!.add(move.captured!);
+      }
+      notifyListeners();
+    }
     return ok;
   }
 
@@ -112,6 +126,9 @@ class GameController extends ChangeNotifier {
     _generation++;
     isThinking = false;
     _chess.reset();
+    for (final pieces in _capturedPieces.values) {
+      pieces.clear();
+    }
     _resignedBy = null;
     _computerError = null;
     notifyListeners();
