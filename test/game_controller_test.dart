@@ -20,6 +20,40 @@ void main() {
     expect(game.fen, startingFen);
   });
 
+  test('Tracks captures for both players and clears them on a new game', () {
+    final game = GameController();
+    addTearDown(game.dispose);
+
+    for (final move in ['e2e4', 'd7d5', 'e4d5', 'd8d5']) {
+      expect(
+        game.tryMove(from: move.substring(0, 2), to: move.substring(2)),
+        isTrue,
+      );
+    }
+
+    expect(game.capturedByWhite.map((piece) => piece.name), ['p']);
+    expect(game.capturedByBlack.map((piece) => piece.name), ['p']);
+
+    game.newGame();
+    expect(game.capturedByWhite, isEmpty);
+    expect(game.capturedByBlack, isEmpty);
+  });
+
+  test('Tracks an en passant capture as a captured pawn', () {
+    final game = GameController();
+    addTearDown(game.dispose);
+
+    for (final move in ['e2e4', 'a7a6', 'e4e5', 'd7d5', 'e5d6']) {
+      expect(
+        game.tryMove(from: move.substring(0, 2), to: move.substring(2)),
+        isTrue,
+      );
+    }
+
+    expect(game.capturedByWhite.map((piece) => piece.name), ['p']);
+    expect(game.capturedByBlack, isEmpty);
+  });
+
   test(
     'Computer answers Black once and ignores a stale reply after reset',
     () async {

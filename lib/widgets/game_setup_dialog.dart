@@ -70,11 +70,15 @@ class _GameSetupDialogState extends State<_GameSetupDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Use a timer'),
-              value: _useTimer,
-              onChanged: (value) => setState(() => _useTimer = value),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Use a timer'),
+                Switch(
+                  value: _useTimer,
+                  onChanged: (value) => setState(() => _useTimer = value),
+                ),
+              ],
             ),
             DropdownButtonFormField<Duration>(
               initialValue: _timeLimit,
@@ -95,7 +99,7 @@ class _GameSetupDialogState extends State<_GameSetupDialog> {
                     }
                   : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             DropdownButtonFormField<ChessBoardScheme>(
               initialValue: _boardScheme,
               decoration: const InputDecoration(labelText: 'Board colors'),
@@ -114,7 +118,7 @@ class _GameSetupDialogState extends State<_GameSetupDialog> {
               },
             ),
             if (widget.showComputerDifficulty) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -133,10 +137,6 @@ class _GameSetupDialogState extends State<_GameSetupDialog> {
                 onChanged: (value) {
                   setState(() => _skillLevel = value.round());
                 },
-              ),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [Text('Easier'), Text('Harder')],
               ),
             ],
           ],

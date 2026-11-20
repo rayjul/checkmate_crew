@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chess/chess.dart' as chesslib;
 import 'package:flutter/material.dart';
 import 'package:simple_chess_board/simple_chess_board.dart';
 
@@ -233,7 +234,6 @@ class _GameScreenState extends State<GameScreen> {
                 padding: const EdgeInsets.all(12),
                 child: Text(_status, style: const TextStyle(fontSize: 20)),
               ),
-              if (_game.vsComputer) _buildComputerDifficulty(),
               if (widget.options.useTimer)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
@@ -246,38 +246,57 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
               Expanded(
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: SimpleChessBoard(
-                      fen: _game.fen,
-                      whitePlayerType: PlayerType.human,
-                      blackPlayerType: _game.vsComputer
-                          ? PlayerType.computer
-                          : PlayerType.human,
-                      engineThinking: _game.isThinking,
-                      onMove: _onMove,
-                      onPromote: () async => PieceType.queen,
-                      onPromotionCommited:
-                          ({required moveDone, required pieceType}) {
-                            moveDone.promotion = pieceType;
-                            _onMove(move: moveDone);
-                          },
-                      onTap: ({required cellCoordinate}) {},
-                      chessBoardColors: boardColors,
-                      cellHighlights: const {},
-                      showPossibleMoves: true,
-                      isInteractive:
-                          !_game.isGameOver &&
-                          !_game.isThinking &&
-                          _timedOutSide == null,
-                      nonInteractiveText:
-                          _game.isGameOver || _timedOutSide != null
-                          ? 'GAME OVER'
-                          : _game.isThinking
-                          ? 'Computer is thinking'
-                          : '',
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    children: [
+                      _CapturedPiecesPanel(
+                        capturer: chesslib.Color.WHITE,
+                        pieces: _game.capturedByWhite,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: SimpleChessBoard(
+                              fen: _game.fen,
+                              whitePlayerType: PlayerType.human,
+                              blackPlayerType: _game.vsComputer
+                                  ? PlayerType.computer
+                                  : PlayerType.human,
+                              engineThinking: _game.isThinking,
+                              onMove: _onMove,
+                              onPromote: () async => PieceType.queen,
+                              onPromotionCommited:
+                                  ({required moveDone, required pieceType}) {
+                                    moveDone.promotion = pieceType;
+                                    _onMove(move: moveDone);
+                                  },
+                              onTap: ({required cellCoordinate}) {},
+                              chessBoardColors: boardColors,
+                              cellHighlights: const {},
+                              showPossibleMoves: true,
+                              isInteractive:
+                                  !_game.isGameOver &&
+                                  !_game.isThinking &&
+                                  _timedOutSide == null,
+                              nonInteractiveText:
+                                  _game.isGameOver || _timedOutSide != null
+                                  ? 'GAME OVER'
+                                  : _game.isThinking
+                                  ? 'Computer is thinking'
+                                  : '',
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _CapturedPiecesPanel(
+                        capturer: chesslib.Color.BLACK,
+                        pieces: _game.capturedByBlack,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -287,52 +306,62 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
   }
+}
 
-  Widget _buildComputerDifficulty() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+class _CapturedPiecesPanel extends StatelessWidget {
+  const _CapturedPiecesPanel({required this.capturer, required this.pieces});
+
+  final chesslib.Color capturer;
+  final List<chesslib.PieceType> pieces;
+
+  @override
+  Widget build(BuildContext context) {
+    final capturerName = capturer == chesslib.Color.WHITE ? 'White' : 'Black';
+    final capturedColor = capturer == chesslib.Color.WHITE ? 'b' : 'w';
+    final capturedColorName = capturer == chesslib.Color.WHITE
+        ? 'black'
+        : 'white';
+
+    return Tooltip(
+      message: 'Captured by $capturerName',
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+        width: 48,
         decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          color: Colors.black.withAlpha(20),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black.withAlpha(28)),
         ),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Computer difficulty',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Text(
+                capturerName,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
                 ),
-                Text('Level ${_game.skillLevel} / 20'),
-              ],
+              ),
             ),
-            Slider(
-              value: _game.skillLevel.toDouble(),
-              min: 0,
-              max: 20,
-              divisions: 20,
-              label: '${_game.skillLevel}',
-              semanticFormatterCallback: (value) =>
-                  'Stockfish level ${value.round()} of 20',
-              onChanged: _game.isThinking
-                  ? null
-                  : (value) => _game.setSkillLevel(value.round()),
-            ),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Easier', style: TextStyle(color: Colors.black54)),
-                Text('Harder', style: TextStyle(color: Colors.black54)),
-              ],
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Changes take effect on the next computer move.',
-              style: TextStyle(fontSize: 12, color: Colors.black54),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                itemCount: pieces.length,
+                itemBuilder: (context, index) {
+                  final pieceName = pieces[index].name.toUpperCase();
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 1),
+                    child: Image.asset(
+                      'assets/pieces/$capturedColor$pieceName.png',
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.contain,
+                      semanticLabel:
+                          'Captured $capturedColorName ${pieces[index].name}',
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),

@@ -27,16 +27,10 @@ void main() {
     expect(find.text('Use a timer'), findsOneWidget);
     expect(find.text('Board colors'), findsOneWidget);
 
-    expect(
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
-      isFalse,
-    );
-    await tester.tap(find.text('Use a timer'));
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+    await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
-      isTrue,
-    );
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
